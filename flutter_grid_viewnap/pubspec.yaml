@@ -9,6 +9,8 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  cached_network_image:
+  shared_preferences:
 
 dev_dependencies:
   flutter_test:
