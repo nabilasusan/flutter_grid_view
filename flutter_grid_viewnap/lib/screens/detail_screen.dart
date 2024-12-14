@@ -1,10 +1,54 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_grid_viewnap/models/home.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
-class DetailScreen extends StatelessWidget {
+class DetailScreen extends StatefulWidget {
   final Home varHome;
   const DetailScreen({super.key, required this.varHome});
+
+  @override
+  State<DetailScreen> createState() => _DetailScreenState();
+}
+
+class _DetailScreenState extends State<DetailScreen> {
+  bool _isFavorite = false;
+
+  Future<void> _loadFavoriteStatus() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    List<String> favoriteHomes = prefs.getStringList('favoriteHomes') ?? [];
+    setState(() {
+      _isFavorite = favoriteHomes.contains(widget.varHome.name);
+    });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _loadFavoriteStatus();
+  }
+
+  Future<void> _toggleFavorite() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    List<String> favoriteHomes = prefs.getStringList('favoriteHomes') ?? [];
+
+    setState(() {
+      if (_isFavorite) {
+        favoriteHomes.remove(widget.varHome.name);
+        _isFavorite = false;
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+            content: Text('${widget.varHome.name} removed from favorites')));
+      } else {
+        favoriteHomes.add(widget.varHome.name);
+        _isFavorite = true;
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+            content: Text('${widget.varHome.name} added to favorites')));
+      }
+    });
+
+    await prefs.setStringList('favoriteHomes', favoriteHomes);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -22,7 +66,7 @@ class DetailScreen extends StatelessWidget {
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(16),
                     child: Image.asset(
-                      varHome.imageAsset,
+                      widget.varHome.imageAsset,
                       fit: BoxFit.cover,
                       width: double.infinity,
                       height: 250,
@@ -50,10 +94,22 @@ class DetailScreen extends StatelessWidget {
               child: Column(
                 children: [
                   // Judul
-                  Text(
-                    varHome.name,
-                    style: const TextStyle(
-                        fontSize: 20, fontWeight: FontWeight.bold),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        widget.varHome.name,
+                        style: const TextStyle(
+                            fontSize: 20, fontWeight: FontWeight.bold),
+                      ),
+                      IconButton(
+                        onPressed: _toggleFavorite,
+                        icon: Icon(_isFavorite
+                            ? Icons.favorite
+                            : Icons.favorite_border),
+                        color: _isFavorite ? Colors.red : null,
+                      )
+                    ],
                   ),
                   const SizedBox(height: 16),
                   // Info lainnya
@@ -69,7 +125,7 @@ class DetailScreen extends StatelessWidget {
                         child: Text('Lokasi',
                             style: TextStyle(fontWeight: FontWeight.bold)),
                       ),
-                      Text(': ${varHome.location}')
+                      Text(': ${widget.varHome.location}')
                     ],
                   ),
                   Row(
@@ -84,7 +140,7 @@ class DetailScreen extends StatelessWidget {
                         child: Text('Dibangun',
                             style: TextStyle(fontWeight: FontWeight.bold)),
                       ),
-                      Text(': ${varHome.built}')
+                      Text(': ${widget.varHome.built}')
                     ],
                   ),
                   Row(
@@ -99,7 +155,7 @@ class DetailScreen extends StatelessWidget {
                         child: Text('Tipe',
                             style: TextStyle(fontWeight: FontWeight.bold)),
                       ),
-                      Text(': ${varHome.type}')
+                      Text(': ${widget.varHome.type}')
                     ],
                   ),
                   const SizedBox(height: 16),
@@ -110,7 +166,7 @@ class DetailScreen extends StatelessWidget {
                   const SizedBox(height: 16),
                   // Deskripsi
                   Text(
-                    varHome.description,
+                    widget.varHome.description,
                     textAlign: TextAlign.justify,
                   ),
                   const SizedBox(height: 16),
@@ -129,14 +185,14 @@ class DetailScreen extends StatelessWidget {
                   height: 200,
                   child: ListView.builder(
                     scrollDirection: Axis.horizontal,
-                    itemCount: varHome.imageUrls.length,
+                    itemCount: widget.varHome.imageUrls.length,
                     itemBuilder: (context, index) {
                       return Padding(
                         padding: const EdgeInsets.only(right: 8),
                         child: ClipRRect(
                             borderRadius: BorderRadius.circular(16),
                             child: CachedNetworkImage(
-                              imageUrl: varHome.imageUrls[index],
+                              imageUrl: widget.varHome.imageUrls[index],
                               placeholder: (context, url) => Transform.scale(
                                 scale: 0.2,
                                 child: const CircularProgressIndicator(),

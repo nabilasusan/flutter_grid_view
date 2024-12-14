@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
-
 import 'package:flutter_grid_viewnap/data/home_data.dart';
 import 'package:flutter_grid_viewnap/models/home.dart';
 import 'package:flutter_grid_viewnap/screens/detail_screen.dart';
+import 'package:flutter_grid_viewnap/screens/favorite_screen.dart';
+
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -17,6 +18,20 @@ class _HomeScreenState extends State<HomeScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Home'),
+        actions: [
+          Container(
+            margin: const EdgeInsets.only(right: 16),
+            child: ElevatedButton.icon(
+                onPressed: () {
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => const FavoriteScreen()));
+                },
+                label: const Text('Favorite'),
+                icon: const Icon(Icons.favorite)),
+          )
+        ],
       ),
       body: SafeArea(
           child: SingleChildScrollView(
@@ -33,7 +48,11 @@ class _HomeScreenState extends State<HomeScreen> {
                 Home varHome = homeList[index];
                 return InkWell(
                   onTap: () {
-                    Navigator.push(context, MaterialPageRoute(builder: (context) => DetailScreen(varHome: varHome)));
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) =>
+                                DetailScreen(varHome: varHome)));
                   },
                   child: Card(
                       shape: RoundedRectangleBorder(
